@@ -13,8 +13,10 @@ class HomePage extends StatelessWidget {
       ),
       body: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Text('Email: ${bloc.email}'),
+            Divider(),
             Text('Password: ${bloc.password}')
           ],
         ),

@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:formvalidation/src/models/producto_model.dart';
 import 'package:formvalidation/src/providers/productos_provider.dart';
@@ -124,7 +123,7 @@ class _ProductoPageState extends State<ProductoPage> {
     );
   }
 
-  void _submit(){
+  void _submit() async {
 
     if (!formKey.currentState.validate()) return;
 
@@ -133,6 +132,10 @@ class _ProductoPageState extends State<ProductoPage> {
     //cuando el form es valido hago estas cosas
 
     setState(() { _guardando = true; });
+
+    if (foto != null){
+      producto.fotoUrl = await productoProvider.subirImagen(foto);
+    }
     
     if(producto.id == null){
       productoProvider.crearProducto(producto);
@@ -183,15 +186,21 @@ class _ProductoPageState extends State<ProductoPage> {
   }
 
 
-  _mostrarFoto(){
+  Widget _mostrarFoto(){
 
     if (producto.fotoUrl != null){
-      //TODO>: tengo que hacer esto
-      return Container();
+      
+      return FadeInImage(
+        image: NetworkImage(producto.fotoUrl),
+        placeholder: AssetImage('assets/jar-loading.gif'),
+        height: 300.0,
+        width: double.infinity,
+        fit: BoxFit.contain,
+      );
     }else{
 
       return Image(
-        image: AssetImage('assets/no-image.png'),
+        image: AssetImage(foto?.path?? 'assets/no-image.png'),
         height: 300.0,
         fit: BoxFit.cover,
       );
@@ -202,21 +211,25 @@ class _ProductoPageState extends State<ProductoPage> {
 
 
   _seleccionarFoto() async {
-
-    foto = await ImagePicker.pickImage(
-      source: ImageSource.gallery
-    );
-
-    if (foto != null){
-      //limpieza
-    }
-
-    setState(() {});
-
+    _procesarImagen(ImageSource.gallery);
   }
 
 
-  _tomarFoto(){}
+  _tomarFoto() async {
+    _procesarImagen(ImageSource.camera);
+  }
+
+  _procesarImagen( ImageSource origen) async {
+    foto = await ImagePicker.pickImage(
+      source: origen
+    );
+
+    if (foto != null){
+      producto.fotoUrl = null;
+    }
+
+    setState(() {});
+  }
 
 
 }
